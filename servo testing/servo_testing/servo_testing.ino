@@ -2,7 +2,13 @@
 #include <Math.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
- 
+//#include "C:\Users\Grant\Documents\Leg\libraries\MyServo\MyServo.h"
+//#include "ServoUtilsRedirect.h"
+#include "ServoUtils.h"
+
+
+//ServoUtils util = ServoUtils();
+
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 #define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
@@ -127,21 +133,6 @@ void setServoPos(int newPos, long startTime, int endTime){
   //Serial.println(life); //Serial.println(servoPos);
 }
 
-void setPosition(int servoNum, int angle){
-  pwm.writeMicroseconds(servoNum, getMicrosecondFromAngle(angle));
-}
-
-int getMicrosecondFromAngle(int angle){
-  return (map(angle, 0, 180, 620, 2380));
-}
-
-int interpolatePosition(unsigned long startTime, int lifeTime){
-  //int ratioThru;
-  //int timeThru = (100*(millis() - startTime));
-
-  return constrain(((100*(millis() - startTime) / (lifeTime))), 0, 100);
-}
-
 void updateServoPosLinear(int servoNum){
   
   int ratioThru = interpolatePosition(start, life);
@@ -153,7 +144,7 @@ void updateServoPosLinear(int servoNum){
 }
 
 void updateServoPosSin(int servoNum){
-  int ratioThru = interpolatePosition(start, life);
+  int ratioThru =0; //0interpolatePosition(start, life);
 
   float mappedRatio = (map(ratioThru, 0, 100, -157, 157))/100.0;
 
