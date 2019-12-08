@@ -16,7 +16,7 @@ int interpolatePosition(unsigned long startTime, int lifeTime){
 
 int getServoPositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition){
   
-  int ratioThru = interpolatePosition(start, life);
+  int ratioThru = interpolatePosition(startTime, lifeTime);
 
   return(oldPosition + (int)(ratioThru * (newPosition - oldPosition)) / 100);
 
@@ -25,7 +25,7 @@ int getServoPositionLinear(unsigned long startTime, int lifeTime, int oldPositio
 }
 
 int getServoPositionSin(unsigned long startTime, int lifeTime, int oldPosition, int newPosition){
-  int ratioThru = interpolatePosition(start, life);
+  int ratioThru = interpolatePosition(startTime, lifeTime);
 
   float mappedRatio = (map(ratioThru, 0, 100, -157, 157))/100.0;
 

@@ -1,18 +1,14 @@
-#include <Servo.h>
 #include <Math.h>
-#include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
-//#include "C:\Users\Grant\Documents\Leg\libraries\MyServo\MyServo.h"
-//#include "ServoUtilsRedirect.h"
+
+#include "MyServo.h"
 #include "ServoUtils.h"
 
-
-//ServoUtils util = ServoUtils();
-
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+MyServo testServo = MyServo(4, 90, &pwm);
+
 #define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
-//Servo servo;
 int servoPos = 45;
 bool hasWritten;
 
@@ -29,45 +25,31 @@ void setup() {
   pwm.begin();  
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
 
+  testServo.setPosition(90);
+  delay(1500);
+
+  testServo.setPosition(60);
+  delay(1500);
   
-  // put your setup code here, to run once:
-  //servo.attach(9);
+  testServo.setPosition(120);
+  delay(1500);
 
-  //servo.write(135);
-  //delay(500);
-  //digitalWrite(LED_BUILTIN, LOW); 
-  //servo.write(45);
-  //delay(500);
+  testServo.setPosition(90);
+  delay(1500);
 
-  //servo.write(90);
-  //writeMicroseconds(uint8_t num, uint16_t Microseconds);
-  pwm.writeMicroseconds(4, 1500);
-  delay(1000);
-  Serial.print("wrote 1!");
-
-  //pwm.writeMicroseconds(4, 1600);
-  //delay(1500);
-  //Serial.print("wrote 2!");
-  //pwm.writeMicroseconds(4, 1400);
-  //delay(1500);
-  //Serial.print("wrote 3!");
-  //pwm.writeMicroseconds(4, 1700);
-  //delay(1500);
-  //Serial.print("wrote 4!");
-  //pwm.writeMicroseconds(4, 1300);
-  //delay(1500);
-  //Serial.print("wrote 5!");
-  //servoPos = 30;
-      pwm.writeMicroseconds(4, 620);
-      delay(3000);
-
-
-  for(int i = 620; i < 2500; i+=10){
-      pwm.writeMicroseconds(4, i);
-      Serial.println(i);
-      delay(5);
-  }      
-  delay(500);
+//  pwm.writeMicroseconds(4, 1500);
+//  delay(1000);
+//
+//      pwm.writeMicroseconds(4, 620);
+//      delay(3000);
+//
+//
+//  for(int i = 620; i < 2500; i+=10){
+//      pwm.writeMicroseconds(4, i);
+//      Serial.println(i);
+//      delay(5);
+//  }      
+//  delay(500);
 
 }
 
@@ -75,25 +57,21 @@ void loop() {
   // put your main code here, to run repeatedly:
   if(millis() % 2000 == 0){
     if(!hasWritten){
-      //Serial.println(millis());
-      //servoPos = (servoPos+15) % 180;
-
-      //setServoPos(((servoPos+30) % 180), millis(), 2000);
-      
-      //Serial.println(servoPos);
       hasWritten = true;
+        //testServo.setServoPosition(servoPos, millis(), 2000);
+
     }
-    
+    servoPos += 45;
   }
   else{
     hasWritten = false;
   }
 
-  updateServoPosLinear(4);
+  testServo.updateServoPositionLinear();
 
-  if(Serial.available()){
-    parseSerial(Serial.readString());
-  }
+//  if(Serial.available()){
+//    parseSerial(Serial.readString());
+//  }
   
 }
 
@@ -104,7 +82,7 @@ void parseSerial(String input){
   Serial.println("Y:" + lTime);
   Serial.print("X:" + sPosition);
 
-  setServoPos(sPosition.toInt(), millis(), lTime.toInt());
+  testServo.setServoPosition(sPosition.toInt(), millis(), lTime.toInt());
 }
 
 String getValue(String data, char separator, int index)
@@ -121,38 +99,4 @@ String getValue(String data, char separator, int index)
         }
     }
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-
-void setServoPos(int newPos, long startTime, int endTime){
-  oldPos = servoPos;
-  start = startTime;
-  life = endTime;
-  servoPos = newPos;
-
-  //Serial.println(oldPos);Serial.println(start); 
-  //Serial.println(life); //Serial.println(servoPos);
-}
-
-void updateServoPosLinear(int servoNum){
-  
-  int ratioThru = interpolatePosition(start, life);
-
-  setPosition(servoNum, (oldPos + (int)(ratioThru * (servoPos - oldPos)) / 100));
-
-  //servo.write(oldPos + (int)((ratioThru * (servoPos - oldPos)) / 100));
-
-}
-
-void updateServoPosSin(int servoNum){
-  int ratioThru =0; //0interpolatePosition(start, life);
-
-  float mappedRatio = (map(ratioThru, 0, 100, -157, 157))/100.0;
-
-  float test = (sin(mappedRatio) + 1)/2.0;
-    
-  setPosition(servoNum, oldPos + (int)(((sin(mappedRatio) + 1)/2.0) * (servoPos - oldPos)));
-
-
-  //Serial.print("relative position: "); Serial.println(relativePosition);
-  //Serial.println((oldPos + (int)(relativePosition * (servoPos - oldPos))));
 }
