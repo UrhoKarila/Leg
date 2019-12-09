@@ -15,10 +15,11 @@
 
 // Adafruit_PWMServoDriver* myDriver;
 
-MyServo::MyServo(int Index, int Position, Adafruit_PWMServoDriver *Driver){
+MyServo::MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriver *Driver){
     myIndex = Index;
     myPosition = Position;
     myDriver = Driver;
+    isInverted = IsInverted;
 }
 
  void MyServo::setPosition(int angle){
@@ -26,10 +27,16 @@ MyServo::MyServo(int Index, int Position, Adafruit_PWMServoDriver *Driver){
  }
 
  void MyServo::setServoPosition(int newPos, long startTime, int endTime){
+  
    myOldPosition = myPosition;
    moveStartTime = startTime;
    moveLifeTime = endTime;
-   myPosition = newPos;
+   if(isInverted){
+    myPosition = 180-newPos;
+  }
+  else{myPosition = newPos;}
+//       Serial.print("Target angle: ");
+//    Serial.println(newPos);
  }
 
  void MyServo::updateServoPositionLinear(){

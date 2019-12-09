@@ -9,9 +9,10 @@
 
 class MyServo {
     public:
-        MyServo(int Index, int Position, Adafruit_PWMServoDriver *Driver);
+        MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriver *Driver);
 
         //int myIndex;
+         bool isInverted;
          int myPosition;
          int myOldPosition;
          unsigned long moveStartTime;

@@ -5,7 +5,11 @@
 #include "ServoUtils.h"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-MyServo testServo = MyServo(4, 90, &pwm);
+
+MyServo shoulder = MyServo(0, 90, false, &pwm);
+MyServo elbow = MyServo(1, 90, true, &pwm);
+MyServo wrist = MyServo(2, 90, false, &pwm);
+MyServo testServo = MyServo(4, 90, false, &pwm);
 
 #define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
@@ -27,15 +31,23 @@ void setup() {
 
   testServo.setPosition(90);
   delay(1500);
-
-  testServo.setPosition(60);
-  delay(1500);
   
-  testServo.setPosition(120);
-  delay(1500);
+  start = millis();
+  
+  shoulder.setServoPosition(135, start, 1000);
+  elbow.setServoPosition(55, start, 500);
+  wrist.setServoPosition(30, start, 500);
 
-  testServo.setPosition(90);
-  delay(1500);
+  delayUntil(start + 1000);
+//
+//  testServo.setPosition(60);
+//  delay(1500);
+//  
+//  testServo.setPosition(120);
+//  delay(1500);
+//
+//  testServo.setPosition(90);
+//  delay(1500);
 
 //  pwm.writeMicroseconds(4, 1500);
 //  delay(1000);
@@ -50,39 +62,92 @@ void setup() {
 //      delay(5);
 //  }      
 //  delay(500);
+  Serial.println("index, position, lifetime");
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(millis() % 2000 == 0){
-    if(!hasWritten){
-      hasWritten = true;
-        //testServo.setServoPosition(servoPos, millis(), 2000);
-
-    }
-    servoPos += 45;
-  }
-  else{
-    hasWritten = false;
-  }
-
-  testServo.updateServoPositionLinear();
+//  if(millis() % 2000 == 0){
+//    if(!hasWritten){
+////        servoPos = (servoPos += 45)%180;
+////
+////        Serial.print("Target angle: ");
+////        Serial.println(servoPos);
+////        hasWritten = true;
+////        testServo.setServoPosition(servoPos, millis(), 2000);
+//
+//    }
+//    
+//  }
+//  else{
+//    hasWritten = false;
+//  }
 
 //  if(Serial.available()){
 //    parseSerial(Serial.readString());
 //  }
+//      updateMotors();
+
+
+  start = millis();
+  
+  shoulder.setServoPosition(45, start, 1000);
+  elbow.setServoPosition(100, start, 500);
+  wrist.setServoPosition(-10, start, 500);
+
+  delayUntil(start + 500);
+  
+  start = millis();
+  elbow.setServoPosition(55, start, 500);
+  wrist.setServoPosition(30, start, 500);
+  delayUntil(start + 500);
+  
+  start = millis();
+  shoulder.setServoPosition(135, start, 1000);
+  delayUntil(start + 1000);
+
+}
+
+void delayUntil(long endTime){
+  while(millis() < endTime){
+    updateMotors();
+
+    delay(10);
+  }
+}
+
+void updateMotors(){
+  shoulder.updateServoPositionSin();
+  elbow.updateServoPositionSin();
+  wrist.updateServoPositionSin();
   
 }
 
 void parseSerial(String input){
-  String sPosition = getValue(input, ':', 0);
-  String lTime = getValue(input, ':', 1);
+  String sPosition = getValue(input, ':', 1);
+  String lTime = getValue(input, ':', 2);
+  String servoIdx = getValue(input, ':', 0);
 
-  Serial.println("Y:" + lTime);
-  Serial.print("X:" + sPosition);
+  switch(servoIdx.toInt()){
+    case 1:
+      shoulder.setServoPosition(sPosition.toInt(), millis(), lTime.toInt()); 
+      break;
+    case 2:
+      elbow.setServoPosition(sPosition.toInt(), millis(), lTime.toInt()); 
+      break;
+    case 3:
+      wrist.setServoPosition(sPosition.toInt(), millis(), lTime.toInt()); 
+      break;
+    case 4:
+      testServo.setServoPosition(sPosition.toInt(), millis(), lTime.toInt());  
+      break;
+  }
 
-  testServo.setServoPosition(sPosition.toInt(), millis(), lTime.toInt());
+
+  Serial.print(shoulder.myPosition);Serial.print(" ");
+  Serial.print(elbow.myPosition);Serial.print(" ");
+  Serial.print(wrist.myPosition);Serial.println(" ");
 }
 
 String getValue(String data, char separator, int index)

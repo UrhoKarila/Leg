@@ -14,17 +14,21 @@ int interpolatePosition(unsigned long startTime, int lifeTime){
   return constrain(((100*(millis() - startTime) / (lifeTime))), 0, 100);
 }
 
-int getServoPositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition){
+int getServoPositionLinear(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
   
   int ratioThru = interpolatePosition(startTime, lifeTime);
-
+//
+//  if(millis() %250 == 0){
+//    Serial.println(ratioThru);
+//  }
+  
   return(oldPosition + (int)(ratioThru * (newPosition - oldPosition)) / 100);
 
   //servo.write(oldPos + (int)((ratioThru * (servoPos - oldPos)) / 100));
 
 }
 
-int getServoPositionSin(unsigned long startTime, int lifeTime, int oldPosition, int newPosition){
+int getServoPositionSin(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
   int ratioThru = interpolatePosition(startTime, lifeTime);
 
   float mappedRatio = (map(ratioThru, 0, 100, -157, 157))/100.0;
