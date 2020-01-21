@@ -15,11 +15,14 @@
 
 // Adafruit_PWMServoDriver* myDriver;
 
-MyServo::MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriver *Driver){
+MyServo::MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_PWMServoDriver *Driver, int LowMicro, int HighMicro){
     myIndex = Index;
     myPosition = Position;
     myDriver = Driver;
     isInverted = IsInverted;
+    myOffset = Offset;
+    myLowMicro = LowMicro;
+    myHighMicro = HighMicro;
 }
 
  void MyServo::setPosition(int angle){
@@ -32,9 +35,9 @@ MyServo::MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriv
    moveStartTime = startTime;
    moveLifeTime = endTime;
    if(isInverted){
-    myPosition = 180-newPos;
+    myPosition = constrain(180-newPos-myOffset, 0, 180);
   }
-  else{myPosition = newPos;}
+  else{myPosition = constrain(newPos+myOffset,0,180);}
 //       Serial.print("Target angle: ");
 //    Serial.println(newPos);
  }
@@ -46,3 +49,7 @@ MyServo::MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriv
  void MyServo::updateServoPositionSin(){
      setPosition(getServoPositionSin(moveStartTime, moveLifeTime, myPosition, myOldPosition));
  }
+
+ int MyServo::getMicrosecondFromAngle(int angle){
+  return (map(angle, 0, 180, myLowMicro, myHighMicro));
+}

@@ -3,9 +3,7 @@
 #include <Math.h>
 
 
-int getMicrosecondFromAngle(int angle){
-  return (map(angle, 0, 180, 620, 2380));
-}
+
 
 int interpolatePosition(unsigned long startTime, int lifeTime){
   //int ratioThru;

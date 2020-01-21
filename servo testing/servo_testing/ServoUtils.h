@@ -6,7 +6,6 @@
     //void setPosition(int servoNum, int angle);
 
 
-    int getMicrosecondFromAngle(int angle);
     int interpolatePosition(unsigned long startTime, int lifeTime);
 
     int getServoPositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition);

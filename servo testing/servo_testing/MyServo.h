@@ -9,12 +9,15 @@
 
 class MyServo {
     public:
-        MyServo(int Index, int Position, bool IsInverted, Adafruit_PWMServoDriver *Driver);
+        MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_PWMServoDriver *Driver, int LowMicro, int HighMicro);
 
         //int myIndex;
          bool isInverted;
+         int myOffset;
          int myPosition;
          int myOldPosition;
+         int myLowMicro;
+         int myHighMicro;
          unsigned long moveStartTime;
          unsigned int moveLifeTime;
 
@@ -24,6 +27,9 @@ class MyServo {
          void setPosition(int angle);
          void updateServoPositionLinear();
          void updateServoPositionSin();
+
+         int getMicrosecondFromAngle(int angle);
+
      private:
         int myIndex;
 };
