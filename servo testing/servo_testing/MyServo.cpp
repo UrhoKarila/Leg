@@ -26,8 +26,13 @@ MyServo::MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_
 }
 
  void MyServo::setPosition(int angle){
+  //Serial.print("Position set to: ");Serial.println(angle);
    myDriver->writeMicroseconds(myIndex, getMicrosecondFromAngle(angle));
  }
+
+void MyServo::setRadianServoPosition(double newPos, long startTime, int endTime){
+  setPosition(toDegrees(newPos));
+}
 
  void MyServo::setServoPosition(int newPos, long startTime, int endTime){
   
@@ -43,11 +48,11 @@ MyServo::MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_
  }
 
  void MyServo::updateServoPositionLinear(){
-   setPosition(getServoPositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition));
+   setPosition(interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition));
  }
 
  void MyServo::updateServoPositionSin(){
-     setPosition(getServoPositionSin(moveStartTime, moveLifeTime, myPosition, myOldPosition));
+     setPosition(interpolatePositionSin(moveStartTime, moveLifeTime, myPosition, myOldPosition));
  }
 
  int MyServo::getMicrosecondFromAngle(int angle){

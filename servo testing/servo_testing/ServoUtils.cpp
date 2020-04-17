@@ -2,7 +2,9 @@
 
 #include <Math.h>
 
-
+double toDegrees(double rads) {
+    return rads * (180.0 / pi);
+}
 
 
 int interpolatePosition(unsigned long startTime, int lifeTime){
@@ -12,13 +14,13 @@ int interpolatePosition(unsigned long startTime, int lifeTime){
   return constrain(((100*(millis() - startTime) / (lifeTime))), 0, 100);
 }
 
-int getServoPositionLinear(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
+int interpolatePositionLinear(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
   
   int ratioThru = interpolatePosition(startTime, lifeTime);
-//
-//  if(millis() %250 == 0){
-//    Serial.println(ratioThru);
-//  }
+
+  if(millis() %25 == 0){
+    Serial.println(ratioThru);
+  }
   
   return(oldPosition + (int)(ratioThru * (newPosition - oldPosition)) / 100);
 
@@ -26,16 +28,16 @@ int getServoPositionLinear(unsigned long startTime, int lifeTime, int newPositio
 
 }
 
-int getServoPositionSin(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
+int interpolatePositionSin(unsigned long startTime, int lifeTime, int newPosition, int oldPosition){
   int ratioThru = interpolatePosition(startTime, lifeTime);
 
   float mappedRatio = (map(ratioThru, 0, 100, -157, 157))/100.0;
 
-  float test = (sin(mappedRatio) + 1)/2.0;
+  //float test = (sin(mappedRatio) + 1)/2.0;
     
   return(oldPosition + (int)(((sin(mappedRatio) + 1)/2.0) * (newPosition - oldPosition)));
 
 
-  //Serial.print("relative position: "); Serial.println(relativePosition);
+  //Serial.print("relative position: "); Serial.println(ratioThru);
   //Serial.println((oldPos + (int)(relativePosition * (servoPos - oldPos))));
 }

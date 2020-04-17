@@ -5,10 +5,12 @@
 
     //void setPosition(int servoNum, int angle);
 
+    const float pi = 3.14159;
 
     int interpolatePosition(unsigned long startTime, int lifeTime);
 
-    int getServoPositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition);
-    int getServoPositionSin(unsigned long startTime, int lifeTime, int oldPosition, int newPosition);
+    int interpolatePositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition);
+    int interpolatePositionSin(unsigned long startTime, int lifeTime, int oldPosition, int newPosition); 
+    double toDegrees(double rads);
 
 #endif

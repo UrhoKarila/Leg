@@ -6,6 +6,8 @@
 
 #include <Adafruit_PWMServoDriver.h>
 
+#include "ServoUtils.h"
+
 
 class MyServo {
     public:
@@ -22,6 +24,8 @@ class MyServo {
          unsigned int moveLifeTime;
 
          Adafruit_PWMServoDriver *myDriver;
+
+        void setRadianServoPosition(double newPos, long startTime, int endTime);
 
          void setServoPosition(int newPos, long startTime, int endTime);
          void setPosition(int angle);
