@@ -86,10 +86,13 @@ void Leg::DetermineDistance(int distance) //distance in mm
 //  Serial.println();
 //
 //  Serial.print("Angles to enter:");
+  int elbowWristAngleDegrees = (toDegrees(elbowWristAngle)-90);
+  if(elbowWristAngleDegrees < 0){
+    elbowWristAngleDegrees *= -1;
+  }
+
   Serial.print("2: ");Serial.println(toDegrees(elbowAngle));
-//  Serial.print("2: ");Serial.println(totalElbowAngle-90);
-  //Serial.print("Raw EAW: ");Serial.println(toDegrees(elbowWristAngle));
-  //Serial.print("3: ");Serial.println(toDegrees(elbowWristAngle)-90);
+  Serial.print("3: ");Serial.println(elbowWristAngleDegrees);
   
 
   //ankle->setPosition(toDegrees(elbowWristAngle)-90);
