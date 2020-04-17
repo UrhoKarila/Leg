@@ -57,35 +57,20 @@ void Leg::DetermineDistance(int distance) //distance in mm
 
   //Determine EW hypotenuse
   float hypotenuse = sqrt(sq(elbowDistance) + sq(rideHeight));
-//  Serial.print("Hypotenuse: ");Serial.println(hypotenuse);
 
   //Determine elbow/wrist angle
   double elbowWristAngle = acos((sq(shinLength)+sq(footLength)-sq(hypotenuse))/(2*shinLength*footLength));
-  //Serial.print("Elbow/Wrist Angle: ");Serial.println(toDegrees(elbowWristAngle));
 
   //Determine Elbow angle
   //Find topmost angle
   double elbowAngleOffset = acos((float)rideHeight/hypotenuse);
    if(elbowDistance < 0){
-    Serial.println("Should be reflected");
     elbowAngleOffset *= -1;
   }
-//  Serial.print("naive elbowangleoffset: ");Serial.println(elbowAngleOffset);
-//  Serial.print("LoC EAO: ");
-
   //Find native angle
   double elbowAngle = acos((sq(shinLength)+sq(hypotenuse)-sq(footLength))/(shinLength*2*hypotenuse));
 
-
-//  Serial.print("Native elbow angle: ");Serial.println(toDegrees(elbowAngle));
   elbowAngle += elbowAngleOffset;
-//  Serial.print("Elbow angle offset: ");Serial.println(toDegrees(elbowAngleOffset));
-  //int totalElbowAngle = toDegrees(elbowAngle) + 90;
-//  Serial.print("Total elbow angle: ");Serial.println(totalElbowAngle);
-//
-//  Serial.println();
-//
-//  Serial.print("Angles to enter:");
   int elbowWristAngleDegrees = (toDegrees(elbowWristAngle)-90);
   if(elbowWristAngleDegrees < 0){
     elbowWristAngleDegrees *= -1;
@@ -95,6 +80,6 @@ void Leg::DetermineDistance(int distance) //distance in mm
   Serial.print("3: ");Serial.println(elbowWristAngleDegrees);
   
 
-  //ankle->setPosition(toDegrees(elbowWristAngle)-90);
-  //knee->setPosition(toDegrees(totalElbowAngle)-90);
+//  ankle->setPosition(elbowWristAngleDegrees);
+//  knee->setPosition(toDegrees(elbowAngle));
 }
