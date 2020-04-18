@@ -30,7 +30,7 @@ long life = 0;
 int oldPos;
 
 enum debugModeEnum{SetRadial, SetServo, SetDistance, SetCartesian};
-enum debugModeEnum debugMode = SetRadial;
+enum debugModeEnum debugMode = SetCartesian;
 
 void setup() {
 
@@ -127,13 +127,10 @@ void loop() {
 void delayUntil(long endTime){
   while(millis() < endTime){
     updateMotors();
-
-    delay(100);
   }
 }
 
 void updateMotors(){
-  
   switch (debugMode){
     case SetDistance:
       myLeg.updateLegDistance();
@@ -143,6 +140,11 @@ void updateMotors(){
       elbow.updateServoPositionSin();
       wrist.updateServoPositionSin();
       break;
+
+    case SetCartesian:
+      myLeg.UpdateCartesianMove();
+      break;
+      
     default:
       break;
   }
@@ -157,6 +159,10 @@ void parseSerial(String input){
   int parsedPosition = 0;
 
   switch (debugMode){
+
+    case SetCartesian:
+      myLeg.SetCartesianTarget(arg1.toInt(), arg2.toInt(), millis(), arg3.toInt());
+      break;
     
     case SetRadial:
       myLeg.SetPolarPosition(arg1.toInt(), arg2.toInt());
