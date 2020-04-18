@@ -15,7 +15,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 MyServo shoulder = MyServo(0, 90, false, 0, &pwm, 500, 2600);
 MyServo elbow = MyServo(1, 90, true, 45, &pwm, 500, 2600);
 MyServo wrist = MyServo(2, 90, false, 45, &pwm, 500, 2600);
-MyServo testServo = MyServo(4, 90, 0, false, &pwm, 500, 2600);
+//MyServo testServo = MyServo(4, 90, 0, false, &pwm, 500, 2600);
 
 Leg myLeg = Leg(&shoulder, &elbow, &wrist, 42, 36, 54);
 
@@ -29,31 +29,33 @@ unsigned long start;
 long life = 0;
 int oldPos;
 
+bool controlWholeLeg = true;
+
 void setup() {
 
   Serial.begin(9600);
-  Serial.print("Testing values!");
+  Serial.println("Testing values!");
 
 Serial.println(109);
-  myLeg.DetermineDistance(109);
+  myLeg.DetermineDistance(109, true);
   
   Serial.println(100);
-  myLeg.DetermineDistance(100);
+  myLeg.DetermineDistance(100, true);
   
   Serial.println(82);
-  myLeg.DetermineDistance(82);
+  myLeg.DetermineDistance(82, true);
   
   Serial.println(55);
-  myLeg.DetermineDistance(55);  
+  myLeg.DetermineDistance(55, true);  
   
   Serial.println(32);
-  myLeg.DetermineDistance(32);
+  myLeg.DetermineDistance(32, true);
 
 
   pwm.begin();  
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
 
-  testServo.setPosition(90);
+//  testServo.setPosition(90);
   delay(1500);
   
   start = millis();
@@ -92,7 +94,8 @@ Serial.println(109);
 
 void loop() {
   // put your main code here, to run repeatedly:
-//  if(millis() % 2000 == 0){
+//  if(millis() % 25 == 0){
+    updateMotors();
 //    if(!hasWritten){
 ////        servoPos = (servoPos += 45)%180;
 ////
@@ -111,7 +114,7 @@ void loop() {
   if(Serial.available()){
     parseSerial(Serial.readString());
   }
-      updateMotors();
+      //updateMotors();
 
 }
 
@@ -124,10 +127,15 @@ void delayUntil(long endTime){
 }
 
 void updateMotors(){
-//  myLeg.updateLegDistance();
-  shoulder.updateServoPositionSin();
-  elbow.updateServoPositionSin();
-  wrist.updateServoPositionSin();
+  if(controlWholeLeg){
+    myLeg.updateLegDistance();
+  }
+  else
+  {
+    shoulder.updateServoPositionSin();
+    elbow.updateServoPositionSin();
+    wrist.updateServoPositionSin();
+  }
 //  testServo.updateServoPositionSin();
 }
 
@@ -140,8 +148,8 @@ void parseSerial(String input){
 
   if(lTime.length() == 0)
     {
-      myLeg.DetermineDistance(servoIdx.toInt());
-      //myLeg.setLegDistance(servoIdx.toInt(), millis(), 1000);
+      //myLeg.DetermineDistance(servoIdx.toInt());
+      myLeg.setLegDistance(servoIdx.toInt(), millis(), 1000);
       Serial.print("Setting distance to :");Serial.println(servoIdx);
     }
     else{
@@ -167,9 +175,9 @@ void parseSerial(String input){
         case 3:
           wrist.setServoPosition(parsedPosition, millis(), lTime.toInt()); 
           break;
-        case 4:
-          testServo.setServoPosition(parsedPosition, millis(), lTime.toInt());  
-          break;
+//        case 4:
+//          testServo.setServoPosition(parsedPosition, millis(), lTime.toInt());  
+//          break;
       }
     
     
@@ -179,58 +187,6 @@ void parseSerial(String input){
     }
 }
 
-//void determineDistance(int distance) //distance in mm
-//{
-//  // ride height:      60
-//  //shoulder distance: 42
-//  // Elbow distance:   36
-//  // Wrist distance:   54
-//  int rideHeight = 60;
-//  int thigh = 42;
-//  int shin = 36;
-//  int jambe = 54;
-//
-//  distance = constrain(distance, 0, 109);
-//  
-//  int elbowDistance = distance - thigh;
-//
-//  //Determine EW hypotenuse
-//  float hypotenuse = sqrt(sq(elbowDistance) + sq(rideHeight));
-//  Serial.print("Hypotenuse: ");Serial.println(hypotenuse);
-//
-//  //Determine elbow/wrist angle
-//  double elbowWristAngle = acos((sq(shin)+sq(jambe)-sq(hypotenuse))/(2*shin*jambe));
-//  Serial.print("Elbow/Wrist Angle: ");Serial.println(to_degrees(elbowWristAngle));
-//
-//  //Determine Elbow angle
-//  //Find topmost angle
-//  double elbowAngleOffset = acos((float)rideHeight/hypotenuse);
-//    if(elbowDistance < 0){
-//    Serial.println("Should be reflected");
-//    elbowAngleOffset *= -1;
-//  }
-//  Serial.print("naive elbowangleoffset: ");Serial.println(elbowAngleOffset);
-//  Serial.print("LoC EAO: ");
-//
-//  //Find native angle
-//  double elbowAngle = acos((sq(shin)+sq(hypotenuse)-sq(jambe))/(shin*2*hypotenuse));
-//
-//
-//  Serial.print("Native elbow angle: ");Serial.println(to_degrees(elbowAngle));
-//  elbowAngle += elbowAngleOffset;
-//  Serial.print("Elbow angle offset: ");Serial.println(to_degrees(elbowAngleOffset));
-//  int totalElbowAngle = to_degrees(elbowAngle) + 90;
-//  Serial.print("Total elbow angle: ");Serial.println(totalElbowAngle);
-//
-//  Serial.println();
-//
-//  Serial.print("Angles to enter:");
-//  Serial.print("3: ");Serial.println(to_degrees(elbowWristAngle)-90);
-//  Serial.print("2: ");Serial.println(totalElbowAngle-90);
-//
-//  wrist.setServoPosition(to_degrees(elbowWristAngle)-90, millis(), 1000);
-//  elbow.setServoPosition(totalElbowAngle-90, millis(), 1000);
-//}
 
 inline double to_degrees(double radians) {
     return radians * (180.0 / pi);

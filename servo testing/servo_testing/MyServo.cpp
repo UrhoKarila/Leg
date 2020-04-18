@@ -27,6 +27,10 @@ MyServo::MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_
 
  void MyServo::setPosition(int angle){
   //Serial.print("Position set to: ");Serial.println(angle);
+     if(isInverted){
+    angle = constrain(180-angle-myOffset, 0, 180);
+  }
+  else{angle = constrain(angle+myOffset,0,180);}
    myDriver->writeMicroseconds(myIndex, getMicrosecondFromAngle(angle));
  }
 

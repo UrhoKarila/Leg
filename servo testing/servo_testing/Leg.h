@@ -11,7 +11,7 @@ class Leg {
     public:
         Leg(MyServo *hipServo, MyServo *kneeServo, MyServo *ankleServo, int thigh, int shin, int foot);
 
-        void DetermineDistance(int distance);
+        void DetermineDistance(int distance, bool isTest = false);
         
         void setLegDistance(int newPos, long startTime, int endTime);
         void updateLegDistance();

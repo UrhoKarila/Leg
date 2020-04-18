@@ -32,15 +32,17 @@ void Leg::setLegDistance(int newPos, long startTime, int endTime){
 }
 
 void Leg::updateLegDistance(){
-  DetermineDistance(interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition));
-
-//  hip->updateServoPositionLinear();
-//  knee->updateServoPositionLinear();
-//  ankle->updateServoPositionLinear();
+  int ratio = interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition); 
+    DetermineDistance(ratio, true);
+  
+  //hip->updateServoPositionLinear();
+  //knee->updateServoPositionLinear();
+  //ankle->updateServoPositionLinear();
 }
 
-
-void Leg::DetermineDistance(int distance) //distance in mm
+//Seems to be acting up
+// Add debug mode to help determine if correct commands are making their way to the servos
+void Leg::DetermineDistance(int distance, bool isTest = false) //distance in mm
 {
   // ride height:      60
   //shoulder distance: 42
@@ -52,7 +54,6 @@ void Leg::DetermineDistance(int distance) //distance in mm
 //  int jambe = 54;
 
   distance = constrain(distance, 0, 109);
-  
   int elbowDistance = distance - thighLength;
 
   //Determine EW hypotenuse
@@ -72,14 +73,17 @@ void Leg::DetermineDistance(int distance) //distance in mm
 
   elbowAngle += elbowAngleOffset;
   int elbowWristAngleDegrees = (toDegrees(elbowWristAngle)-90);
-  if(elbowWristAngleDegrees < 0){
-    elbowWristAngleDegrees *= -1;
+//  if(elbowWristAngleDegrees < 0){
+//    elbowWristAngleDegrees *= -1;
+//  }
+
+  if(isTest)
+  {
+    Serial.println("Targeted distance is: ");Serial.println(distance);
+    Serial.print("knee, set to 2: ");Serial.println(toDegrees(elbowAngle));
+    Serial.print("ankle, set to 3: ");Serial.println(elbowWristAngleDegrees);
   }
-
-  Serial.print("2: ");Serial.println(toDegrees(elbowAngle));
-  Serial.print("3: ");Serial.println(elbowWristAngleDegrees);
   
-
-//  ankle->setPosition(elbowWristAngleDegrees);
-//  knee->setPosition(toDegrees(elbowAngle));
+  knee->setPosition(toDegrees(elbowAngle));
+  ankle->setPosition(elbowWristAngleDegrees);
 }

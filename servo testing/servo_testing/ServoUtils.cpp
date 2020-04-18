@@ -18,9 +18,9 @@ int interpolatePositionLinear(unsigned long startTime, int lifeTime, int newPosi
   
   int ratioThru = interpolatePosition(startTime, lifeTime);
 
-  if(millis() %25 == 0){
-    Serial.println(ratioThru);
-  }
+//  if(millis() %25 == 0){
+//    Serial.println(ratioThru);
+//  }
   
   return(oldPosition + (int)(ratioThru * (newPosition - oldPosition)) / 100);
 
