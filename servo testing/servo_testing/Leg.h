@@ -12,6 +12,12 @@ class Leg {
         Leg(MyServo *hipServo, MyServo *kneeServo, MyServo *ankleServo, int thigh, int shin, int foot);
 
         void DetermineDistance(int distance, bool isTest = false);
+
+        void SetPolarPosition(int angle, int distance, bool isTest = false);
+        void SetCartesianPosition(int xPos, int yPos, bool isTest = false);
+
+        void SetCartesianTarget(int newX, int newY, long startTime, int endTime);
+        void UpdateCartesianMove();
         
         void setLegDistance(int newPos, long startTime, int endTime);
         void updateLegDistance();
@@ -27,6 +33,13 @@ class Leg {
 
         int myPosition;
         int myOldPosition;
+    
+        int myXTarget;
+        int myYTarget;
+    
+        int myOldXTarget;
+        int myOldYTarget;
+        
         unsigned long moveStartTime;
         unsigned int moveLifeTime;
         

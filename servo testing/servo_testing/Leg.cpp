@@ -16,8 +16,61 @@ Leg::Leg(MyServo *hipServo, MyServo *kneeServo, MyServo *ankleServo, int thigh, 
     myPosition = 50;
     myOldPosition = 50;
 
+    myXTarget = 20;
+    myYTarget = 20;
+
+    myOldXTarget = 20;
+    myOldYTarget = 20;
+
     moveStartTime = 0;
     moveLifeTime = 0;
+}
+
+
+void Leg::SetPolarPosition(int angle, int distance, bool isTest = false)
+{
+  angle += 45;
+  hip->setPosition(angle);
+  DetermineDistance(distance);
+}
+
+void Leg::SetCartesianPosition(int xPos, int yPos, bool isTest = false)
+{
+  float hypotenuse = sqrt(sq(xPos) + sq(yPos));
+  float angle = atan2(yPos, xPos);
+
+  if(isTest)
+  {
+    Serial.print("distance: ");Serial.println(hypotenuse);
+    Serial.print("angle (degrees): ");Serial.println(toDegrees(angle));
+  }
+  else
+  {
+      SetPolarPosition(toDegrees(angle), hypotenuse);
+  
+  }
+}
+
+void Leg::SetCartesianTarget(int newX, int newY, long startTime, int endTime)
+{
+  myOldXTarget = myXTarget;
+  myOldYTarget = myYTarget;
+
+  moveStartTime = startTime;
+  moveLifeTime = endTime;
+
+  myXTarget = newX;
+  myYTarget = newY;
+}
+
+void Leg::UpdateCartesianMove(){
+//  Serial.println("UpdateCartesianMove");
+    int xPos = interpolatePositionLinear(moveStartTime, moveLifeTime, myXTarget, myOldXTarget);
+    int yPos = interpolatePositionLinear(moveStartTime, moveLifeTime, myYTarget, myOldYTarget);
+//  Serial.print("xPos: ");Serial.println(xPos);
+//  Serial.print("yPos: ");Serial.println(yPos);
+
+    SetCartesianPosition(xPos, yPos);
 }
         
 void Leg::setLegDistance(int newPos, long startTime, int endTime){
@@ -33,7 +86,7 @@ void Leg::setLegDistance(int newPos, long startTime, int endTime){
 
 void Leg::updateLegDistance(){
   int ratio = interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition); 
-    DetermineDistance(ratio, true);
+    DetermineDistance(ratio, false);
   
   //hip->updateServoPositionLinear();
   //knee->updateServoPositionLinear();
@@ -52,8 +105,9 @@ void Leg::DetermineDistance(int distance, bool isTest = false) //distance in mm
 //  int thigh = 42;
 //  int shin = 36;
 //  int jambe = 54;
-
-  distance = constrain(distance, 0, 109);
+  int maxDistance = acos(rideHeight/(shinLength+footLength));
+  distance = constrain(distance, 0, maxDistance);
+  
   int elbowDistance = distance - thighLength;
 
   //Determine EW hypotenuse
