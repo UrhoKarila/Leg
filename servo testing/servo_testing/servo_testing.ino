@@ -29,28 +29,34 @@ unsigned long start;
 long life = 0;
 int oldPos;
 
-bool controlWholeLeg = true;
+enum debugModeEnum{SetRadial, SetServo, SetDistance, SetCartesian};
+enum debugModeEnum debugMode = SetRadial;
 
 void setup() {
 
   Serial.begin(9600);
   Serial.println("Testing values!");
 
-Serial.println(109);
-  myLeg.DetermineDistance(109, true);
-  
-  Serial.println(100);
-  myLeg.DetermineDistance(100, true);
-  
-  Serial.println(82);
-  myLeg.DetermineDistance(82, true);
-  
-  Serial.println(55);
-  myLeg.DetermineDistance(55, true);  
-  
-  Serial.println(32);
-  myLeg.DetermineDistance(32, true);
-
+//Serial.println(109);
+//  myLeg.DetermineDistance(109, true);
+//  
+//  Serial.println(100);
+//  myLeg.DetermineDistance(100, true);
+//  
+//  Serial.println(82);
+//  myLeg.DetermineDistance(82, true);
+//  
+//  Serial.println(55);
+//  myLeg.DetermineDistance(55, true);  
+//  
+//  Serial.println(32);
+//  myLeg.DetermineDistance(32, true);
+Serial.println("Max Y");
+myLeg.SetCartesianPosition(0, 100, true);
+Serial.println("Max X");
+myLeg.SetCartesianPosition(100, 0, true);
+Serial.println("Compromise");
+myLeg.SetCartesianPosition(50, 50, true);
 
   pwm.begin();  
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
@@ -127,63 +133,69 @@ void delayUntil(long endTime){
 }
 
 void updateMotors(){
-  if(controlWholeLeg){
-    myLeg.updateLegDistance();
+  
+  switch (debugMode){
+    case SetDistance:
+      myLeg.updateLegDistance();
+      break;
+    case SetServo:
+      shoulder.updateServoPositionSin();
+      elbow.updateServoPositionSin();
+      wrist.updateServoPositionSin();
+      break;
+    default:
+      break;
   }
-  else
-  {
-    shoulder.updateServoPositionSin();
-    elbow.updateServoPositionSin();
-    wrist.updateServoPositionSin();
-  }
-//  testServo.updateServoPositionSin();
 }
 
 void parseSerial(String input){
-  String sPosition = getValue(input, ':', 1);
-  String lTime = getValue(input, ':', 2);
-  String servoIdx = getValue(input, ':', 0);
+  
+  String arg1 = getValue(input, ':', 0);
+  String arg2 = getValue(input, ':', 1);
+  String arg3 = getValue(input, ':', 2);
 
   int parsedPosition = 0;
 
-  if(lTime.length() == 0)
-    {
-      //myLeg.DetermineDistance(servoIdx.toInt());
-      myLeg.setLegDistance(servoIdx.toInt(), millis(), 1000);
-      Serial.print("Setting distance to :");Serial.println(servoIdx);
-    }
-    else{
-          
-        
-      if(sPosition.startsWith("-")){
-        String subPosition = sPosition.substring(1);
+  switch (debugMode){
+    
+    case SetRadial:
+      myLeg.SetPolarPosition(arg1.toInt(), arg2.toInt());
+      break;
+      
+    case SetDistance:
+      myLeg.setLegDistance(arg1.toInt(), millis(), 4000);
+      Serial.print("Setting distance to :");Serial.println(arg1.toInt());
+      break;
+      
+    case SetServo:  
+      if(arg2.startsWith("-")){
+        String subPosition = arg2.substring(1);
         
         parsedPosition = 0-(subPosition.toInt());
         Serial.print("Parsed position: ");Serial.println(parsedPosition);
       }
       else{
-        parsedPosition = sPosition.toInt();
+        parsedPosition = arg2.toInt();
       }
     
-      switch(servoIdx.toInt()){
+      switch(arg1.toInt()){
         case 1:
-          shoulder.setServoPosition(parsedPosition, millis(), lTime.toInt()); 
+          shoulder.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
         case 2:
-          elbow.setServoPosition(parsedPosition, millis(), lTime.toInt()); 
+          elbow.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
         case 3:
-          wrist.setServoPosition(parsedPosition, millis(), lTime.toInt()); 
+          wrist.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
-//        case 4:
-//          testServo.setServoPosition(parsedPosition, millis(), lTime.toInt());  
-//          break;
       }
-    
-    
       Serial.print(shoulder.myPosition);Serial.print(" ");
       Serial.print(elbow.myPosition);Serial.print(" ");
       Serial.print(wrist.myPosition);Serial.println(" ");
+      break;
+      
+    default:
+      break;
     }
 }
 
