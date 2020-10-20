@@ -12,12 +12,17 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
   // Elbow distance:   36
   // Wrist distance:   54
 
-MyServo shoulder = MyServo(0, 90, false, 0, &pwm, 500, 2600);
-MyServo elbow = MyServo(1, 90, true, 45, &pwm, 500, 2600);
-MyServo wrist = MyServo(2, 90, false, 45, &pwm, 500, 2600);
+MyServo shoulder = MyServo(0, 90, false, 0, 0, &pwm, 500, 2600);
+MyServo elbow = MyServo(1, 90, true, 45, 0, &pwm, 500, 2600);
+MyServo wrist = MyServo(2, 90, false, 45, 0, &pwm, 500, 2600);
+
+MyServo test_shoulder = MyServo(4, 90, false, 0, 0, &pwm, 500, 2600);
+MyServo test_elbow = MyServo(5, 90, true, 0, 90, &pwm, 500, 2600);
+MyServo test_wrist = MyServo(6, 90, false, 0, 0, &pwm, 500, 2600);
 //MyServo testServo = MyServo(4, 90, 0, false, &pwm, 500, 2600);
 
 Leg myLeg = Leg(&shoulder, &elbow, &wrist, 42, 36, 54);
+Leg testLeg = Leg(&test_shoulder, &test_elbow, &test_wrist, 32, 48, 81);
 
 #define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
@@ -30,12 +35,32 @@ long life = 0;
 int oldPos;
 
 enum debugModeEnum{SetRadial, SetServo, SetDistance, SetCartesian};
-enum debugModeEnum debugMode = SetCartesian;
+enum debugModeEnum debugMode = SetServo;
 
 void setup() {
 
   Serial.begin(9600);
-  Serial.println("Testing values!");
+
+  myLeg.SetRideHeight(60);
+  testLeg.SetRideHeight(100);
+  
+//  Serial.println("Testing values!");
+//  unsigned long start = millis();
+//unsigned long lastWrite = 0;
+//int i = 0;
+//  while(millis() < (start + 1000))
+//  {
+//    
+//    if(millis() - lastWrite > 10){
+//      int offset = sinusoidalArc(start, 1000, 20);
+//      Serial.print(i);Serial.print(" offset: ");Serial.println(offset);
+//      lastWrite = millis();  
+//      i++;
+//    }
+//    
+//    delay(1);
+//  }
+  
 
 //Serial.println(109);
 //  myLeg.DetermineDistance(109, true);
@@ -51,12 +76,14 @@ void setup() {
 //  
 //  Serial.println(32);
 //  myLeg.DetermineDistance(32, true);
-Serial.println("Max Y");
-myLeg.SetCartesianPosition(0, 100, true);
-Serial.println("Max X");
-myLeg.SetCartesianPosition(100, 0, true);
-Serial.println("Compromise");
-myLeg.SetCartesianPosition(50, 50, true);
+//Serial.println("Max Y");
+//myLeg.SetCartesianPosition(0, 100, true);
+//Serial.println("Max X");
+//myLeg.SetCartesianPosition(100, 0, true);
+//Serial.println("Compromise");
+//myLeg.SetCartesianPosition(50, 50, true);
+
+//Serial.print("Is 0 true?: ");Serial.println((bool)0);
 
   pwm.begin();  
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
@@ -66,11 +93,15 @@ myLeg.SetCartesianPosition(50, 50, true);
   
   start = millis();
   
-  shoulder.setServoPosition(90, start, 1000);
-  elbow.setServoPosition(90, start, 500);
-  wrist.setServoPosition(90, start, 500);
+  shoulder.SetServoPosition(90, start, 1000);
+  elbow.SetServoPosition(90, start, 500);
+  wrist.SetServoPosition(90, start, 500);
 
-  delayUntil(start + 1000);
+  test_shoulder.SetServoPosition(90, start, 1000);
+  test_elbow.SetServoPosition(90, start, 500);
+  test_wrist.SetServoPosition(90, start, 500);
+
+  delay(1000);
 //
 //  testServo.setPosition(60);
 //  delay(1500);
@@ -94,8 +125,20 @@ myLeg.SetCartesianPosition(50, 50, true);
 //      delay(5);
 //  }      
 //  delay(500);
-  Serial.println("index, position, lifetime");
-
+//for(int i = 0; i < 25; i++)
+//  {
+//    myLeg.SetCartesianTarget(100, 0, millis(), 1000, false);
+//    delayUntil(millis()+1000);
+//    myLeg.SetCartesianTarget(0, 100, millis(), 1000, true);
+//    delayUntil(millis()+1000);
+//  }  
+//
+//    myLeg.SetCartesianTarget(20, 20, millis(), 1000, true);
+//
+//
+//  Serial.println("index, position, lifetime");
+//
+Serial.println("Alive!");
 }
 
 void loop() {
@@ -108,7 +151,7 @@ void loop() {
 ////        Serial.print("Target angle: ");
 ////        Serial.println(servoPos);
 ////        hasWritten = true;
-////        testServo.setServoPosition(servoPos, millis(), 2000);
+////        testServo.SetServoPosition(servoPos, millis(), 2000);
 //
 //    }
 //    
@@ -133,16 +176,22 @@ void delayUntil(long endTime){
 void updateMotors(){
   switch (debugMode){
     case SetDistance:
-      myLeg.updateLegDistance();
+      myLeg.UpdateLegDistance();
+      testLeg.UpdateLegDistance();
       break;
     case SetServo:
-      shoulder.updateServoPositionSin();
-      elbow.updateServoPositionSin();
-      wrist.updateServoPositionSin();
+      shoulder.UpdateServoPositionSin();
+      elbow.UpdateServoPositionSin();
+      wrist.UpdateServoPositionSin();
+
+      test_shoulder.UpdateServoPositionSin();
+      test_elbow.UpdateServoPositionSin();
+      test_wrist.UpdateServoPositionSin();
       break;
 
     case SetCartesian:
       myLeg.UpdateCartesianMove();
+      testLeg.UpdateCartesianMove();
       break;
       
     default:
@@ -155,13 +204,14 @@ void parseSerial(String input){
   String arg1 = getValue(input, ':', 0);
   String arg2 = getValue(input, ':', 1);
   String arg3 = getValue(input, ':', 2);
+  String arg4 = getValue(input, ':', 3);
 
   int parsedPosition = 0;
 
   switch (debugMode){
 
     case SetCartesian:
-      myLeg.SetCartesianTarget(arg1.toInt(), arg2.toInt(), millis(), arg3.toInt());
+      myLeg.SetCartesianTarget(arg1.toInt(), arg2.toInt(), millis(), arg3.toInt(), (bool)arg4.toInt());
       break;
     
     case SetRadial:
@@ -169,8 +219,18 @@ void parseSerial(String input){
       break;
       
     case SetDistance:
-      myLeg.setLegDistance(arg1.toInt(), millis(), 4000);
-      Serial.print("Setting distance to :");Serial.println(arg1.toInt());
+    switch(arg1.toInt()){
+        case 1:
+          myLeg.SetLegDistance(arg2.toInt(), millis(), 4000);
+          Serial.print("Setting foamboard distance to: ");Serial.println(arg2.toInt());
+          break;
+        case 2:
+          testLeg.SetLegDistance(arg2.toInt(), millis(), 1500);
+          
+          Serial.print("Setting printed distance to: ");Serial.println(arg2.toInt());
+          break;
+      }
+      
       break;
       
     case SetServo:  
@@ -186,18 +246,33 @@ void parseSerial(String input){
     
       switch(arg1.toInt()){
         case 1:
-          shoulder.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          shoulder.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
         case 2:
-          elbow.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          elbow.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
         case 3:
-          wrist.setServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          wrist.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          break;
+        case 4:
+          test_shoulder.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          break;
+        case 5:
+          test_elbow.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
+          break;
+        case 6:
+          test_wrist.SetServoPosition(parsedPosition, millis(), arg3.toInt()); 
           break;
       }
+      Serial.print("Foamboard arm: ");
       Serial.print(shoulder.myPosition);Serial.print(" ");
       Serial.print(elbow.myPosition);Serial.print(" ");
       Serial.print(wrist.myPosition);Serial.println(" ");
+
+      Serial.print("Printed arm: ");
+      Serial.print(test_shoulder.myPosition);Serial.print(" ");
+      Serial.print(test_elbow.myPosition);Serial.print(" ");
+      Serial.print(test_wrist.myPosition);Serial.println(" ");
       break;
       
     default:

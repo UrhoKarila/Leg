@@ -6,11 +6,21 @@ double toDegrees(double rads) {
     return rads * (180.0 / pi);
 }
 
+int sinusoidalArc(unsigned long startTime, int lifeTime, int maxDeflection)
+{
+  int ratioThru = interpolatePosition(startTime, lifeTime);
+//  Serial.print("Ratio Thru: ");Serial.println(ratioThru);
+  int foldedRatio = (50-abs(ratioThru - 50))*2;
+//  Serial.print("foldedRatio: ");Serial.println(foldedRatio);
+  float mappedRatio = (map(foldedRatio, 0, 100, -157, 157))/100.0;
+
+  //float test = (sin(mappedRatio) + 1)/2.0;
+//  Serial.print("Sin value: ");Serial.println(((sin(mappedRatio) + 1)/2.0));
+    
+  return((int)(((sin(mappedRatio) + 1)/2.0) * (maxDeflection)));
+}
 
 int interpolatePosition(unsigned long startTime, int lifeTime){
-  //int ratioThru;
-  //int timeThru = (100*(millis() - startTime));
-
   return constrain(((100*(millis() - startTime) / (lifeTime))), 0, 100);
 }
 

@@ -7,6 +7,8 @@
 
     const float pi = 3.14159;
 
+    int sinusoidalArc(unsigned long startTime, int lifeTime, int maxDeflection);
+
     int interpolatePosition(unsigned long startTime, int lifeTime);
 
     int interpolatePositionLinear(unsigned long startTime, int lifeTime, int oldPosition, int newPosition);

@@ -24,34 +24,38 @@ Leg::Leg(MyServo *hipServo, MyServo *kneeServo, MyServo *ankleServo, int thigh, 
 
     moveStartTime = 0;
     moveLifeTime = 0;
+
+    isStepping = false;
 }
 
 
-void Leg::SetPolarPosition(int angle, int distance, bool isTest = false)
+void Leg::SetPolarPosition(int angle, int distance, int zOffset = 0, bool isTest = false)
 {
   angle += 45;
-  hip->setPosition(angle);
-  DetermineDistance(distance);
+  hip->SetPosition(angle);
+  DetermineDistance(distance, zOffset);
 }
 
-void Leg::SetCartesianPosition(int xPos, int yPos, bool isTest = false)
+void Leg::SetCartesianPosition(int xPos, int yPos, int zOffset = 0, bool isTest = false)
 {
   float hypotenuse = sqrt(sq(xPos) + sq(yPos));
   float angle = atan2(yPos, xPos);
 
+  
   if(isTest)
   {
     Serial.print("distance: ");Serial.println(hypotenuse);
     Serial.print("angle (degrees): ");Serial.println(toDegrees(angle));
+    Serial.print("zOffset: ");Serial.println(zOffset);
   }
   else
   {
-      SetPolarPosition(toDegrees(angle), hypotenuse);
+      SetPolarPosition(toDegrees(angle), hypotenuse, zOffset);
   
   }
 }
 
-void Leg::SetCartesianTarget(int newX, int newY, long startTime, int endTime)
+void Leg::SetCartesianTarget(int newX, int newY, long startTime, int endTime, bool isStep = false)
 {
   myOldXTarget = myXTarget;
   myOldYTarget = myYTarget;
@@ -61,19 +65,33 @@ void Leg::SetCartesianTarget(int newX, int newY, long startTime, int endTime)
 
   myXTarget = newX;
   myYTarget = newY;
+
+  isStepping = isStep;
+}
+
+void Leg::SetRideHeight(int newHeight){
+  rideHeight = newHeight;
 }
 
 void Leg::UpdateCartesianMove(){
 //  Serial.println("UpdateCartesianMove");
     int xPos = interpolatePositionLinear(moveStartTime, moveLifeTime, myXTarget, myOldXTarget);
     int yPos = interpolatePositionLinear(moveStartTime, moveLifeTime, myYTarget, myOldYTarget);
+
+
+  int zOffset = 0;
+  if(isStepping)
+  {
+    zOffset = sinusoidalArc(moveStartTime, moveLifeTime, 20);
+  }
+    
 //  Serial.print("xPos: ");Serial.println(xPos);
 //  Serial.print("yPos: ");Serial.println(yPos);
 
-    SetCartesianPosition(xPos, yPos);
+    SetCartesianPosition(xPos, yPos, zOffset);
 }
         
-void Leg::setLegDistance(int newPos, long startTime, int endTime){
+void Leg::SetLegDistance(int newPos, long startTime, int endTime){
    if(myOldPosition != myPosition){
        Serial.println(myPosition);
    }
@@ -84,41 +102,38 @@ void Leg::setLegDistance(int newPos, long startTime, int endTime){
 
 }
 
-void Leg::updateLegDistance(){
+void Leg::UpdateLegDistance(){
   int ratio = interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition); 
     DetermineDistance(ratio, false);
-  
-  //hip->updateServoPositionLinear();
-  //knee->updateServoPositionLinear();
-  //ankle->updateServoPositionLinear();
 }
 
 //Seems to be acting up
 // Add debug mode to help determine if correct commands are making their way to the servos
-void Leg::DetermineDistance(int distance, bool isTest = false) //distance in mm
+void Leg::DetermineDistance(int distance, int zOffset = 0, bool isTest = false) //distance in mm
 {
   // ride height:      60
   //shoulder distance: 42
   // Elbow distance:   36
   // Wrist distance:   54
-  int rideHeight = 60;
+  int stepHeight = 60 - zOffset;
 //  int thigh = 42;
 //  int shin = 36;
 //  int jambe = 54;
-  int maxDistance = acos(rideHeight/(shinLength+footLength));
+  int maxDistance = sqrt(sq(shinLength+footLength)-sq(stepHeight))+thighLength;
+  
   distance = constrain(distance, 0, maxDistance);
   
   int elbowDistance = distance - thighLength;
 
   //Determine EW hypotenuse
-  float hypotenuse = sqrt(sq(elbowDistance) + sq(rideHeight));
+  float hypotenuse = sqrt(sq(elbowDistance) + sq(stepHeight));
 
   //Determine elbow/wrist angle
   double elbowWristAngle = acos((sq(shinLength)+sq(footLength)-sq(hypotenuse))/(2*shinLength*footLength));
 
   //Determine Elbow angle
   //Find topmost angle
-  double elbowAngleOffset = acos((float)rideHeight/hypotenuse);
+  double elbowAngleOffset = acos((float)stepHeight/hypotenuse);
    if(elbowDistance < 0){
     elbowAngleOffset *= -1;
   }
@@ -133,11 +148,13 @@ void Leg::DetermineDistance(int distance, bool isTest = false) //distance in mm
 
   if(isTest)
   {
+    Serial.print("Max distance is: ");Serial.println(maxDistance);
     Serial.println("Targeted distance is: ");Serial.println(distance);
     Serial.print("knee, set to 2: ");Serial.println(toDegrees(elbowAngle));
     Serial.print("ankle, set to 3: ");Serial.println(elbowWristAngleDegrees);
+    Serial.print("zOffset, set to: ");Serial.println(zOffset);
   }
   
-  knee->setPosition(toDegrees(elbowAngle));
-  ankle->setPosition(elbowWristAngleDegrees);
+  knee->SetPosition(toDegrees(elbowAngle));
+  ankle->SetPosition(elbowWristAngleDegrees);
 }

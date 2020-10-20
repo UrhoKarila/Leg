@@ -11,16 +11,18 @@ class Leg {
     public:
         Leg(MyServo *hipServo, MyServo *kneeServo, MyServo *ankleServo, int thigh, int shin, int foot);
 
-        void DetermineDistance(int distance, bool isTest = false);
+        void DetermineDistance(int distance, int zOffset = 0, bool isTest = false);
 
-        void SetPolarPosition(int angle, int distance, bool isTest = false);
-        void SetCartesianPosition(int xPos, int yPos, bool isTest = false);
+        void SetRideHeight(int newHeight);
+ 
+        void SetPolarPosition(int angle, int distance, int zOffset = 0, bool isTest = false);
+        void SetCartesianPosition(int xPos, int yPos, int zOffset = 0, bool isTest = false);
 
-        void SetCartesianTarget(int newX, int newY, long startTime, int endTime);
+        void SetCartesianTarget(int newX, int newY, long startTime, int endTime, bool isStep);
         void UpdateCartesianMove();
         
-        void setLegDistance(int newPos, long startTime, int endTime);
-        void updateLegDistance();
+        void SetLegDistance(int newPos, long startTime, int endTime);
+        void UpdateLegDistance();
 
 
         MyServo* hip;
@@ -30,6 +32,8 @@ class Leg {
         int thighLength;
         int shinLength;
         int footLength;
+
+        int rideHeight;
 
         int myPosition;
         int myOldPosition;
@@ -42,7 +46,8 @@ class Leg {
         
         unsigned long moveStartTime;
         unsigned int moveLifeTime;
-        
+
+        bool isStepping;
         //int myIndex;
 //         bool isInverted;
 //         int myOffset;
