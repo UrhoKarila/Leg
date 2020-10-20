@@ -15,50 +15,55 @@
 
 // Adafruit_PWMServoDriver* myDriver;
 
-MyServo::MyServo(int Index, int Position, bool IsInverted, int Offset, Adafruit_PWMServoDriver *Driver, int LowMicro, int HighMicro){
+MyServo::MyServo(int Index, int Position, bool IsInverted, int SoftOffset, int HardOffset, Adafruit_PWMServoDriver *Driver, int LowMicro, int HighMicro){
     myIndex = Index;
     myPosition = Position;
     myDriver = Driver;
     isInverted = IsInverted;
-    myOffset = Offset;
+    mySoftOffset = SoftOffset;
+    myHardOffset = HardOffset;
     myLowMicro = LowMicro;
     myHighMicro = HighMicro;
 }
 
- void MyServo::setPosition(int angle){
+ void MyServo::SetPosition(int angle){
   //Serial.print("Position set to: ");Serial.println(angle);
      if(isInverted){
-    angle = constrain(180-angle-myOffset, 0, 180);
+    angle = constrain(180-angle-mySoftOffset, 0, 180);
   }
-  else{angle = constrain(angle+myOffset,0,180);}
-   myDriver->writeMicroseconds(myIndex, getMicrosecondFromAngle(angle));
+  else{angle = constrain(angle+mySoftOffset,0,180);}
+   myDriver->writeMicroseconds(myIndex, GetMicrosecondFromAngle(angle));
  }
 
-void MyServo::setRadianServoPosition(double newPos, long startTime, int endTime){
-  setPosition(toDegrees(newPos));
+void MyServo::SetRadianServoPosition(double newPos, long startTime, int endTime){
+  SetPosition(toDegrees(newPos));
 }
 
- void MyServo::setServoPosition(int newPos, long startTime, int endTime){
+void MyServo::SetJointPosition(int newPos, long startTime, int endTime){
+  
+}
+
+ void MyServo::SetServoPosition(int newPos, long startTime, int endTime){
   
    myOldPosition = myPosition;
    moveStartTime = startTime;
    moveLifeTime = endTime;
    if(isInverted){
-    myPosition = constrain(180-newPos-myOffset, 0, 180);
+    myPosition = constrain(180-newPos-mySoftOffset, 0, 180);
   }
-  else{myPosition = constrain(newPos+myOffset,0,180);}
+  else{myPosition = constrain(newPos+mySoftOffset,0,180);}
 //       Serial.print("Target angle: ");
 //    Serial.println(newPos);
  }
 
- void MyServo::updateServoPositionLinear(){
-   setPosition(interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition));
+ void MyServo::UpdateServoPositionLinear(){
+   SetPosition(interpolatePositionLinear(moveStartTime, moveLifeTime, myPosition, myOldPosition));
  }
 
- void MyServo::updateServoPositionSin(){
-     setPosition(interpolatePositionSin(moveStartTime, moveLifeTime, myPosition, myOldPosition));
+ void MyServo::UpdateServoPositionSin(){
+     SetPosition(interpolatePositionSin(moveStartTime, moveLifeTime, myPosition, myOldPosition));
  }
 
- int MyServo::getMicrosecondFromAngle(int angle){
+ int MyServo::GetMicrosecondFromAngle(int angle){
   return (map(angle, 0, 180, myLowMicro, myHighMicro));
 }
